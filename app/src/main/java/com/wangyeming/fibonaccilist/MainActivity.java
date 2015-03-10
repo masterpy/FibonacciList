@@ -18,6 +18,7 @@ import java.util.List;
 
 /**
  * 显示斐波那契列表的activity
+ * 迭代法计算斐波那契列表
  *
  * @author Yeming Wang
  * @date 2015/03/11
@@ -25,7 +26,9 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity {
 
     //初始化计算的斐波那契数的个数
-    private int INIT_THREADHOLD = 100;
+    private int INIT_THREADHOLD = 20;
+    //每次刷新的斐波那契数的个数
+    private int REFRASH_THREADHOLD = 20;
     //储存斐波那契列表的List
     private List<BigInteger> fibonacciList = new ArrayList<>();
     //显示斐波那契列表的RecyclerView
@@ -76,6 +79,7 @@ public class MainActivity extends ActionBarActivity {
      */
     public void displayFibonacci() {
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new FibonacciAdapter(this, fibonacciList);
@@ -94,8 +98,26 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void run() {
-                for(int i=startNum;i<startNum+INIT_THREADHOLD;i++) {
-                    getNextNumber(i);
+                //每次加载30个值
+                for (int i = startNum; i < startNum + INIT_THREADHOLD; i++) {
+                    Log.d("wym", "ssssssss " + i);
+                    switch (i) {
+                        case 0:
+                            BigInteger number = getNextNumber(0);
+                            fibonacciList.add(number);
+                            break;
+                        default:
+                            double x = Math.pow(i - 1, 2) + 1 ;
+                            double y = Math.pow(i, 2);
+                            int z = (int) (y - x);
+                            BigInteger num = new BigInteger("0");
+                            //从n^2到（n+1)^2需要计算的次数
+                            for (int j = (int) x; j <= y; j++) {
+                                num = getNextNumber(j);
+                            }
+                            Log.d("wym", "z " + z + " num " + num);
+                            fibonacciList.add(num);
+                    }
                 }
                 Message message = Message.obtain();
                 message.obj = "ok";
@@ -107,24 +129,45 @@ public class MainActivity extends ActionBarActivity {
     /**
      * 获取下一个斐波那契数值
      */
-    public void getNextNumber(int pos) {
+    public BigInteger getNextNumber(int pos) {
         switch (pos) {
             case 0:
                 number1 = new BigInteger("0");
-                fibonacciList.add(number1);
-                break;
+                //fibonacciList.add(number1);
+                return number1;
             case 1:
                 number2 = new BigInteger("1");
-                fibonacciList.add(number2);
-                break;
+                //fibonacciList.add(number2);
+                return number2;
             default:
                 BigInteger number = number2.add(number1);
-                fibonacciList.add(number);
+                //fibonacciList.add(number);
                 number2 = number;
                 number1 = number2;
-                break;
+                return number;
         }
     }
+
+
+    /*public void getFibonacciNumber(int n) {
+        int nSquare = (int)Math.pow(n,2);
+        switch (nSquare) {
+            case 0:
+                fibonacciList.add(new BigInteger("0"));
+                break;
+            default:
+                BigInteger one = new BigInteger("1");
+                BigInteger two = new BigInteger("2");
+                BigInteger z = BigInteger.valueOf((long)Math.sqrt(5));
+                BigInteger x = one.add(z).divide(two);
+                BigInteger y = one.subtract(z).divide(two);
+                BigInteger number = x.pow(nSquare).subtract(y.pow(nSquare)).divide(z);
+                System.out.println((long)Math.sqrt(5));
+                Log.d("wym", "one " + one + " two " + two + " z " + z + " x " + x + " y " + y + " num " + number);
+                fibonacciList.add(number);
+                break;
+        }
+    }*/
 
     public void setScrollerListener() {
         mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -132,8 +175,8 @@ public class MainActivity extends ActionBarActivity {
             public void onScrollStateChanged(RecyclerView view, int scrollState) {
                 //判断是否滑到底部
                 int lastPos = mLayoutManager.findLastCompletelyVisibleItemPosition() + 1;
-                Log.d("wym","lastPos " + lastPos + " size " + fibonacciList.size());
-                if(lastPos > fibonacciList.size() -2) {
+                Log.d("wym", "lastPos " + lastPos + " size " + fibonacciList.size());
+                if (lastPos > fibonacciList.size() - 2) {
                     Log.d("wym", "底部");
                     calculateFibonacci(fibonacciList.size());
                 }
