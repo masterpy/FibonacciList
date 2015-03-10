@@ -4,5 +4,6 @@
     <string name="app_name">FibonacciList</string>
     <string name="action_settings">Settings</string>
     <string name="fibonacci_number">fibonacci</string>
+    <string name="number">n^2</string>
 
 </resources>

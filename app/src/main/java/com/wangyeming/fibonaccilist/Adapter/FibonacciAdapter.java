@@ -9,10 +9,6 @@ import android.widget.TextView;
 
 import com.wangyeming.fibonaccilist.R;
 
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,20 +19,18 @@ import java.util.List;
  */
 public class FibonacciAdapter extends RecyclerView.Adapter<FibonacciAdapter.ViewHolder> {
 
-    private List<BigInteger> fibonacciList = new ArrayList<>();
+    private List<String> fibonacciList = new ArrayList<>();
     private LayoutInflater mInflater;
-    //显示为科学技术法的阈值
-    private BigInteger BIG_NUMBER_THREADHOLD = BigInteger.valueOf((long)Math.pow(10,10));
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView number;
-
+        public TextView num;
         public ViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    public FibonacciAdapter(Context context, List<BigInteger> fibonacciList) {
+    public FibonacciAdapter(Context context, List<String> fibonacciList) {
         mInflater = LayoutInflater.from(context);
         this.fibonacciList = fibonacciList;
     }
@@ -46,33 +40,21 @@ public class FibonacciAdapter extends RecyclerView.Adapter<FibonacciAdapter.View
         View view = mInflater.inflate(R.layout.item_fibonacci,
                 viewGroup, false);
         ViewHolder vh = new ViewHolder(view);
+        vh.num = (TextView) view.findViewById(R.id.num);
         vh.number = (TextView) view.findViewById(R.id.number);
         return vh;
     }
 
     @Override
     public void onBindViewHolder(FibonacciAdapter.ViewHolder vh, int i) {
-        String numberDisplay = "";
-        BigInteger fNum = fibonacciList.get(i);
-        if(fNum.compareTo(BIG_NUMBER_THREADHOLD) == 1) {
-            //显示为科学技术法
-            numberDisplay = format(fNum, 10);
-        } else {
-            numberDisplay = fNum.toString();
-        }
+        String numberDisplay = fibonacciList.get(i);
         vh.number.setText(numberDisplay);
+        vh.num.setText(i + "^2");
     }
 
     @Override
     public int getItemCount() {
         return fibonacciList.size();
-    }
-
-    private static String format(BigInteger x, int scale) {
-        NumberFormat formatter = new DecimalFormat("0.0E0");
-        formatter.setRoundingMode(RoundingMode.HALF_UP);
-        formatter.setMinimumFractionDigits(scale);
-        return formatter.format(x);
     }
 
 }
