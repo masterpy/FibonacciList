@@ -35,6 +35,8 @@ public class MainActivity extends ActionBarActivity {
     private FibonacciAdapter mAdapter;
     private BigInteger number1 = new BigInteger("0");
     private BigInteger number2 = new BigInteger("1");
+    //判断当前数是否显示为科学技术法
+    private boolean isScientificNotation = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
