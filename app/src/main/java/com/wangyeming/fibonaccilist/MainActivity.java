@@ -6,6 +6,7 @@ import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -30,11 +31,11 @@ public class MainActivity extends ActionBarActivity {
     //显示斐波那契列表的RecyclerView
     private RecyclerView mRecyclerView;
     //显示斐波那契列表的RecyclerView的显示布局管理
-    private RecyclerView.LayoutManager mLayoutManager;
+    private LinearLayoutManager mLayoutManager;
     //Fibonacci Adapter
     private FibonacciAdapter mAdapter;
-    private BigInteger number1 = new BigInteger("0");
-    private BigInteger number2 = new BigInteger("1");
+    private BigInteger number1;
+    private BigInteger number2;
     //判断当前数是否显示为科学技术法
     private boolean isScientificNotation = false;
 
@@ -43,7 +44,8 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         displayFibonacci(); //设置RecyclerView显示
-        calculateFibonacci(); //计算fibonacci数
+        calculateFibonacci(0); //计算fibonacci数
+        setScrollerListener(); //监听是否滑动到底部
     }
 
 
@@ -73,8 +75,6 @@ public class MainActivity extends ActionBarActivity {
      * 显示斐波那契列表
      */
     public void displayFibonacci() {
-        fibonacciList.add(new BigInteger("0"));
-        fibonacciList.add(new BigInteger("1"));
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -89,12 +89,12 @@ public class MainActivity extends ActionBarActivity {
         }
     };
 
-    public void calculateFibonacci() {
+    public void calculateFibonacci(final int startNum) {
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-                for(int i=0;i<INIT_THREADHOLD;i++) {
+                for(int i=startNum;i<startNum+INIT_THREADHOLD;i++) {
                     getNextNumber(i);
                 }
                 Message message = Message.obtain();
@@ -124,5 +124,20 @@ public class MainActivity extends ActionBarActivity {
                 number1 = number2;
                 break;
         }
+    }
+
+    public void setScrollerListener() {
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView view, int scrollState) {
+                //判断是否滑到底部
+                int lastPos = mLayoutManager.findLastCompletelyVisibleItemPosition() + 1;
+                Log.d("wym","lastPos " + lastPos + " size " + fibonacciList.size());
+                if(lastPos > fibonacciList.size() -2) {
+                    Log.d("wym", "底部");
+                    calculateFibonacci(fibonacciList.size());
+                }
+            }
+        });
     }
 }
