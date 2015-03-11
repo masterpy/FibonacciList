@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.wangyeming.fibonaccilist.Adapter.FibonacciAdapter;
 
@@ -47,11 +49,14 @@ public class MainActivity extends ActionBarActivity {
     private boolean isScientificNotation = false;
     //判断当前是否在计算
     private boolean isCalculate = false;
+    //加载条
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progressBar = (ProgressBar) findViewById(R.id.loading);
         displayFibonacci(); //设置RecyclerView显示
         fastCalculateFibonacci(0, INIT_THREADHOLD); //计算斐波那契数
         setScrollerListener(); //监听是否滑动到底部
@@ -104,7 +109,8 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void handleMessage(android.os.Message msg) {
             mAdapter.notifyDataSetChanged();
-            isCalculate = false; //当前正在计算
+            isCalculate = false; //计算完成
+            progressBar.setVisibility(View.INVISIBLE);
         }
     };
 
@@ -115,6 +121,7 @@ public class MainActivity extends ActionBarActivity {
      * @param totalNum
      */
     public void fastCalculateFibonacci(final int startNum, final int totalNum) {
+        progressBar.setVisibility(View.VISIBLE); //显示加载动画
         new Thread(new Runnable() {
 
             @Override
