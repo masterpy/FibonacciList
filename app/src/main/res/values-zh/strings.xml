@@ -5,5 +5,6 @@
     <string name="action_settings">设置</string>
     <string name="fibonacci_number">斐波那契</string>
     <string name="number">n^2</string>
+    <string name="reverse">倒序排列</string>
 
 </resources>

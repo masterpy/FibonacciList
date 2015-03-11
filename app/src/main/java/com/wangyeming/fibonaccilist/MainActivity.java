@@ -96,6 +96,14 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
 
+        if(id == R.id.reverse) {
+            if(mLayoutManager.getReverseLayout()) {
+                mLayoutManager.setReverseLayout(false);  //正序排列
+            } else {
+                mLayoutManager.setReverseLayout(true);  //倒序排列
+            }
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
