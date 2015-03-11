@@ -33,7 +33,7 @@ public class MainActivity extends ActionBarActivity {
     //初始化计算的斐波那契数的个数
     private int INIT_THREADHOLD = 30;
     //每次刷新的斐波那契数的个数
-    private int REFRASH_THREADHOLD = 10;
+    private int REFRASH_THREADHOLD = 20;
     //显示为科学技术法的阈值
     private BigInteger BIG_NUMBER_THREADHOLD = BigInteger.valueOf((long) Math.pow(10, 10));
 
@@ -49,6 +49,10 @@ public class MainActivity extends ActionBarActivity {
     //迭代法存储前两个值
     private BigInteger number1;
     private BigInteger number2;
+    //公式法存储值
+    //迭代法存储前两个值
+    private BigDecimal aa;
+    private BigDecimal bb;
     //公式法的固定值
     private BigDecimal one;
     private BigDecimal two;
@@ -67,7 +71,8 @@ public class MainActivity extends ActionBarActivity {
         displayFibonacci(); //设置RecyclerView显示
         calculateBaseNum();
         //newCalculateFibonacci(0, INIT_THREADHOLD); //公式法计算fibonacci数
-        calculateFibonacci(0, INIT_THREADHOLD); //迭代法计算fibonacci数
+        //calculateFibonacci(0, INIT_THREADHOLD); //迭代法计算fibonacci数
+        fastCalculateFibonacci(0, INIT_THREADHOLD);
         setScrollerListener(); //监听是否滑动到底部
     }
 
@@ -196,7 +201,7 @@ public class MainActivity extends ActionBarActivity {
                             numberDisplay = num.toString();
                         }
                     }
-                    Log.d("wym", "n " + i + " numberDisplay " + numberDisplay );
+                    Log.d("wym", "n " + i + " numberDisplay " + numberDisplay);
                     fibonacciList.add(numberDisplay);
                 }
                 Message message = Message.obtain();
@@ -204,6 +209,79 @@ public class MainActivity extends ActionBarActivity {
                 MainActivity.this.handler1.sendMessage(message);
             }
         }).start();
+    }
+
+
+    /**
+     * 调用二分法获取斐波那契数
+     * @param startNum
+     * @param totalNum
+     */
+    public void fastCalculateFibonacci(final int startNum, final int totalNum) {
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                isCalculate = true; //当前正在计算
+                for (int i = startNum; i < startNum + totalNum; i++) {
+                    BigInteger num = fastFibonacciDoubling((int)Math.pow(i,2));
+                    String numberDisplay = "";
+                    if (isScientificNotation) {
+                        numberDisplay = format(num, 10);
+                    } else {
+                        if (num.compareTo(BIG_NUMBER_THREADHOLD) == 1) {
+                            //显示为科学技术法
+                            numberDisplay = format(num, 10);
+                            isScientificNotation = true;
+                        } else {
+                            numberDisplay = num.toString();
+                        }
+                    }
+                    Log.d("wym", "n " + i + " numberDisplay " + numberDisplay);
+                    fibonacciList.add(numberDisplay);
+                }
+                Message message = Message.obtain();
+                message.obj = "ok";
+                MainActivity.this.handler1.sendMessage(message);
+            }
+        }).start();
+    }
+
+    /*
+	 * Fast doubling method. Faster than the matrix method.
+	 * F(2n) = F(n) * (2*F(n+1) - F(n)).
+	 * F(2n+1) = F(n+1)^2 + F(n)^2.
+	 * This implementation is the non-recursive version. See the web page and
+	 * the other programming language implementations for the recursive version.
+	 */
+    private static BigInteger fastFibonacciDoubling(int n) {
+        BigInteger a = BigInteger.ZERO;
+        BigInteger b = BigInteger.ONE;
+        int m = 0;
+        for (int i = 31 - Integer.numberOfLeadingZeros(n); i >= 0; i--) {
+            // Loop invariant: a = F(m), b = F(m+1)
+
+            // Double it
+            BigInteger d = multiply(a, b.shiftLeft(1).subtract(a));
+            BigInteger e = multiply(a, a).add(multiply(b, b));
+            a = d;
+            b = e;
+            m *= 2;
+
+            // Advance by one conditionally
+            if (((n >>> i) & 1) != 0) {
+                BigInteger c = a.add(b);
+                a = b;
+                b = c;
+                m++;
+            }
+        }
+        return a;
+    }
+
+    // Multiplies two BigIntegers. This function makes it easy to swap in a faster algorithm like Karatsuba multiplication.
+    private static BigInteger multiply(BigInteger x, BigInteger y) {
+        return x.multiply(y);
     }
 
     /**
@@ -240,7 +318,17 @@ public class MainActivity extends ActionBarActivity {
      */
     public BigInteger getFibonacciNumber(int n) {
         int nSquare = (int) Math.pow(n, 2);
-        BigDecimal number = x.pow(nSquare).subtract(y.pow(nSquare)).divide(z);
+        switch (n) {
+            case 0:
+                aa = new BigDecimal("1");
+                bb = new BigDecimal("1");
+                break;
+            default:
+                aa = aa.multiply(x.pow(2 * n - 1));
+                bb = bb.multiply(y.pow(2 * n - 1));
+        }
+        Log.d("wym", "aa " + aa + " bb " + bb);
+        BigDecimal number = aa.subtract(bb).divide(z);
         BigInteger num = number.toBigInteger();
         return num;
     }
@@ -254,9 +342,10 @@ public class MainActivity extends ActionBarActivity {
                 Log.d("wym", "lastPos " + lastPos + " size " + fibonacciList.size());
                 if (lastPos > fibonacciList.size() - 2) {
                     Log.d("wym", "底部" + fibonacciList.size());
-                    if(!isCalculate) {
+                    if (!isCalculate) {
                         //newCalculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
-                        calculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
+                        //calculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
+                        fastCalculateFibonacci(fibonacciList.size(), INIT_THREADHOLD);
                     }
                 }
             }
