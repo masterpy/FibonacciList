@@ -9,11 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 
 import com.wangyeming.fibonaccilist.Adapter.FibonacciAdapter;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -23,7 +21,7 @@ import java.util.List;
 
 /**
  * 显示斐波那契列表的activity
- * 迭代法计算斐波那契列表
+ * 二分法计算斐波那契列表
  *
  * @author Yeming Wang
  * @date 2015/03/11
@@ -43,22 +41,8 @@ public class MainActivity extends ActionBarActivity {
     private RecyclerView mRecyclerView;
     //显示斐波那契列表的RecyclerView的显示布局管理
     private LinearLayoutManager mLayoutManager;
-    private ListView lt;
     //Fibonacci Adapter
     private FibonacciAdapter mAdapter;
-    //迭代法存储前两个值
-    private BigInteger number1;
-    private BigInteger number2;
-    //公式法存储值
-    //迭代法存储前两个值
-    private BigDecimal aa;
-    private BigDecimal bb;
-    //公式法的固定值
-    private BigDecimal one;
-    private BigDecimal two;
-    private BigDecimal z;
-    private BigDecimal x;
-    private BigDecimal y;
     //判断当前数是否显示为科学技术法
     private boolean isScientificNotation = false;
     //判断当前是否在计算
@@ -69,10 +53,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         displayFibonacci(); //设置RecyclerView显示
-        calculateBaseNum();
-        //newCalculateFibonacci(0, INIT_THREADHOLD); //公式法计算fibonacci数
-        //calculateFibonacci(0, INIT_THREADHOLD); //迭代法计算fibonacci数
-        fastCalculateFibonacci(0, INIT_THREADHOLD);
+        fastCalculateFibonacci(0, INIT_THREADHOLD); //计算斐波那契数
         setScrollerListener(); //监听是否滑动到底部
     }
 
@@ -96,8 +77,8 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
 
-        if(id == R.id.reverse) {
-            if(mLayoutManager.getReverseLayout()) {
+        if (id == R.id.reverse) {
+            if (mLayoutManager.getReverseLayout()) {
                 mLayoutManager.setReverseLayout(false);  //正序排列
             } else {
                 mLayoutManager.setReverseLayout(true);  //倒序排列
@@ -128,100 +109,8 @@ public class MainActivity extends ActionBarActivity {
     };
 
     /**
-     * 调用迭代法获取斐波那契数
+     * 调用double法获取斐波那契数
      *
-     * @param startNum
-     */
-    public void calculateFibonacci(final int startNum, final int totalNum) {
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                isCalculate = true; //当前正在计算
-                for (int i = startNum; i < startNum + totalNum; i++) {
-                    switch (i) {
-                        case 0:
-                            BigInteger number = getNextNumber(0);
-                            fibonacciList.add(number.toString());
-                            break;
-                        default:
-                            String numberDisplay = "";
-                            double x = Math.pow(i - 1, 2) + 1;
-                            double y = Math.pow(i, 2);
-                            int z = (int) (y - x);
-                            BigInteger num = new BigInteger("0");
-                            //从n^2到（n+1)^2需要计算的次数
-                            for (int j = (int) x; j <= y; j++) {
-                                num = getNextNumber(j);
-                            }
-                            Log.d("wym", "z " + z + " num " + num);
-                            if (isScientificNotation) {
-                                numberDisplay = format(num, 10);
-                            } else {
-                                if (num.compareTo(BIG_NUMBER_THREADHOLD) == 1) {
-                                    //显示为科学技术法
-                                    numberDisplay = format(num, 10);
-                                    isScientificNotation = true;
-                                } else {
-                                    numberDisplay = num.toString();
-                                }
-                            }
-                            fibonacciList.add(numberDisplay);
-                    }
-                }
-                Message message = Message.obtain();
-                message.obj = "ok";
-                MainActivity.this.handler1.sendMessage(message);
-            }
-        }).start();
-    }
-
-    public void calculateBaseNum() {
-        one = new BigDecimal("1");
-        two = new BigDecimal("2");
-        z = BigDecimal.valueOf(Math.sqrt(5));
-        x = one.add(z).divide(two);
-        y = one.subtract(z).divide(two);
-    }
-
-    /**
-     * 调用公式法获取斐波那契数
-     *
-     * @param startNum
-     */
-    public void newCalculateFibonacci(final int startNum, final int totalNum) {
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                isCalculate = true; //当前正在计算
-                for (int i = startNum; i < startNum + totalNum; i++) {
-                    BigInteger num = getFibonacciNumber(i);
-                    String numberDisplay = "";
-                    if (isScientificNotation) {
-                        numberDisplay = format(num, 10);
-                    } else {
-                        if (num.compareTo(BIG_NUMBER_THREADHOLD) == 1) {
-                            //显示为科学技术法
-                            numberDisplay = format(num, 10);
-                            isScientificNotation = true;
-                        } else {
-                            numberDisplay = num.toString();
-                        }
-                    }
-                    Log.d("wym", "n " + i + " numberDisplay " + numberDisplay);
-                    fibonacciList.add(numberDisplay);
-                }
-                Message message = Message.obtain();
-                message.obj = "ok";
-                MainActivity.this.handler1.sendMessage(message);
-            }
-        }).start();
-    }
-
-
-    /**
-     * 调用二分法获取斐波那契数
      * @param startNum
      * @param totalNum
      */
@@ -232,7 +121,7 @@ public class MainActivity extends ActionBarActivity {
             public void run() {
                 isCalculate = true; //当前正在计算
                 for (int i = startNum; i < startNum + totalNum; i++) {
-                    BigInteger num = fastFibonacciDoubling((int)Math.pow(i,2));
+                    BigInteger num = fastFibonacciDoubling((int) Math.pow(i, 2));
                     String numberDisplay = "";
                     if (isScientificNotation) {
                         numberDisplay = format(num, 10);
@@ -256,27 +145,22 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /*
-	 * Fast doubling method. Faster than the matrix method.
+     * Fast doubling method.
 	 * F(2n) = F(n) * (2*F(n+1) - F(n)).
 	 * F(2n+1) = F(n+1)^2 + F(n)^2.
-	 * This implementation is the non-recursive version. See the web page and
-	 * the other programming language implementations for the recursive version.
 	 */
     private static BigInteger fastFibonacciDoubling(int n) {
         BigInteger a = BigInteger.ZERO;
         BigInteger b = BigInteger.ONE;
         int m = 0;
         for (int i = 31 - Integer.numberOfLeadingZeros(n); i >= 0; i--) {
-            // Loop invariant: a = F(m), b = F(m+1)
-
-            // Double it
+            // a = F(m), b = F(m+1)
             BigInteger d = multiply(a, b.shiftLeft(1).subtract(a));
             BigInteger e = multiply(a, a).add(multiply(b, b));
             a = d;
             b = e;
             m *= 2;
-
-            // Advance by one conditionally
+            // 当该位为0时，不加1，当该位为1时，加1
             if (((n >>> i) & 1) != 0) {
                 BigInteger c = a.add(b);
                 a = b;
@@ -287,72 +171,22 @@ public class MainActivity extends ActionBarActivity {
         return a;
     }
 
-    // Multiplies two BigIntegers. This function makes it easy to swap in a faster algorithm like Karatsuba multiplication.
+    // 计算相乘
     private static BigInteger multiply(BigInteger x, BigInteger y) {
         return x.multiply(y);
     }
 
     /**
-     * 获取下一个斐波那契数值
-     *
-     * @param pos
-     * @return
+     * 设置滑动监听
      */
-    public BigInteger getNextNumber(int pos) {
-        switch (pos) {
-            case 0:
-                number1 = new BigInteger("0");
-                //fibonacciList.add(number1);
-                return number1;
-            case 1:
-                number2 = new BigInteger("1");
-                //fibonacciList.add(number2);
-                return number2;
-            default:
-                BigInteger number = number2.add(number1);
-                //fibonacciList.add(number);
-                number2 = number;
-                number1 = number2;
-                return number;
-        }
-    }
-
-
-    /**
-     * 公式法获取任意n值的斐波那契数
-     *
-     * @param n
-     * @return
-     */
-    public BigInteger getFibonacciNumber(int n) {
-        int nSquare = (int) Math.pow(n, 2);
-        switch (n) {
-            case 0:
-                aa = new BigDecimal("1");
-                bb = new BigDecimal("1");
-                break;
-            default:
-                aa = aa.multiply(x.pow(2 * n - 1));
-                bb = bb.multiply(y.pow(2 * n - 1));
-        }
-        Log.d("wym", "aa " + aa + " bb " + bb);
-        BigDecimal number = aa.subtract(bb).divide(z);
-        BigInteger num = number.toBigInteger();
-        return num;
-    }
-
     public void setScrollerListener() {
         mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView view, int scrollState) {
                 //判断是否滑到底部
                 int lastPos = mLayoutManager.findLastCompletelyVisibleItemPosition() + 1;
-                Log.d("wym", "lastPos " + lastPos + " size " + fibonacciList.size());
                 if (lastPos > fibonacciList.size() - 2) {
-                    Log.d("wym", "底部" + fibonacciList.size());
                     if (!isCalculate) {
-                        //newCalculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
-                        //calculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
                         fastCalculateFibonacci(fibonacciList.size(), INIT_THREADHOLD);
                     }
                 }
@@ -360,6 +194,13 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    /**
+     * 科学技术法格式化
+     *
+     * @param x
+     * @param scale
+     * @return
+     */
     private static String format(BigInteger x, int scale) {
         NumberFormat formatter = new DecimalFormat("0.0E0");
         formatter.setRoundingMode(RoundingMode.HALF_UP);
