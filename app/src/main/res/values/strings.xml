@@ -6,5 +6,6 @@
     <string name="fibonacci_number">fibonacci</string>
     <string name="number">n^2</string>
     <string name="reverse">Reverse</string>
+    <string name="action_author">author</string>
 
 </resources>

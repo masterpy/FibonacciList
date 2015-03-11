@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.wangyeming.fibonaccilist.Adapter.FibonacciAdapter;
 
@@ -78,8 +79,8 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_author) {
+            Toast.makeText(this, "作者：王烨明", Toast.LENGTH_SHORT).show();
         }
 
         if (id == R.id.reverse) {
@@ -194,7 +195,7 @@ public class MainActivity extends ActionBarActivity {
                 int lastPos = mLayoutManager.findLastCompletelyVisibleItemPosition() + 1;
                 if (lastPos > fibonacciList.size() - 2) {
                     if (!isCalculate) {
-                        fastCalculateFibonacci(fibonacciList.size(), INIT_THREADHOLD);
+                        fastCalculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
                     }
                 }
             }
