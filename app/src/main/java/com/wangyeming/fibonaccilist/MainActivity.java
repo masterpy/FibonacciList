@@ -37,6 +37,8 @@ public class MainActivity extends ActionBarActivity {
     private int REFRASH_THREADHOLD = 20;
     //显示为科学技术法的阈值
     private BigInteger BIG_NUMBER_THREADHOLD = BigInteger.valueOf((long) Math.pow(10, 10));
+    //总共显示的数目的阈值
+    private int TOTAL_NUM = 450;
 
     //储存斐波那契列表的List
     private List<String> fibonacciList = new ArrayList<>();
@@ -52,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
     private boolean isCalculate = false;
     //加载条
     private ProgressBar progressBar;
+    //记录当前已经计算的数
+    private int countNum = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,8 +114,13 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void handleMessage(android.os.Message msg) {
             mAdapter.notifyDataSetChanged();
-            isCalculate = false; //计算完成
-            progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.INVISIBLE); //计算完成加载动画停止
+            countNum += REFRASH_THREADHOLD;
+            if(countNum < TOTAL_NUM) {
+                fastCalculateFibonacci(countNum, REFRASH_THREADHOLD);
+            } else {
+                isCalculate = false; //计算完成
+            }
         }
     };
 
@@ -122,7 +131,7 @@ public class MainActivity extends ActionBarActivity {
      * @param totalNum
      */
     public void fastCalculateFibonacci(final int startNum, final int totalNum) {
-        progressBar.setVisibility(View.VISIBLE); //显示加载动画
+        //progressBar.setVisibility(View.VISIBLE); //显示加载动画
         new Thread(new Runnable() {
 
             @Override
@@ -193,9 +202,17 @@ public class MainActivity extends ActionBarActivity {
             public void onScrollStateChanged(RecyclerView view, int scrollState) {
                 //判断是否滑到底部
                 int lastPos = mLayoutManager.findLastCompletelyVisibleItemPosition() + 1;
-                if (lastPos > fibonacciList.size() - 2) {
-                    if (!isCalculate) {
-                        fastCalculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
+                if (lastPos >= countNum ) {
+                    //滑到底部且正在计算
+                    if (countNum < TOTAL_NUM) {
+                        //fastCalculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
+                        progressBar.setVisibility(View.VISIBLE); //显示加载动画
+                    } else {
+                        if(!isCalculate) {
+                            progressBar.setVisibility(View.VISIBLE); //显示加载动画
+                            Toast.makeText(MainActivity.this, "上拉记载更多", Toast.LENGTH_SHORT).show();
+                            fastCalculateFibonacci(fibonacciList.size(), REFRASH_THREADHOLD);
+                        }
                     }
                 }
             }
